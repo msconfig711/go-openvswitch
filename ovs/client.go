@@ -19,7 +19,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"k8s.io/utils/exec"
+	k8sexec "k8s.io/utils/exec"
 	"log"
 	"os/exec"
 	"strings"
@@ -213,7 +213,7 @@ func (c *Client) debugf(format string, a ...interface{}) {
 
 // New creates a new Client with zero or more OptionFunc configurations
 // applied.
-func New(execer exec.Interface, options ...OptionFunc) (*Client, error) {
+func New(execer k8sexec.Interface, options ...OptionFunc) (*Client, error) {
 	if _, err := execer.LookPath(OVS_OFCTL); err != nil {
 		return nil, fmt.Errorf("OVS is not installed")
 	}
@@ -253,7 +253,7 @@ func New(execer exec.Interface, options ...OptionFunc) (*Client, error) {
 	}
 	c.App = app
 
-	return c
+	return c, nil
 }
 
 // An OptionFunc is a function which can apply configuration to a Client.
