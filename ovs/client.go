@@ -19,9 +19,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	k8sexec "k8s.io/utils/exec"
 	"log"
 	"os/exec"
 	"strings"
+)
+
+const (
+	OVS_OFCTL = "ovs-ofctl"
+	OVS_VSCTL = "ovs-vsctl"
 )
 
 // A Client is a client type which enables programmatic control of Open
@@ -207,7 +213,14 @@ func (c *Client) debugf(format string, a ...interface{}) {
 
 // New creates a new Client with zero or more OptionFunc configurations
 // applied.
-func New(options ...OptionFunc) *Client {
+func New(execer k8sexec.Interface, options ...OptionFunc) (*Client, error) {
+	if _, err := execer.LookPath(OVS_OFCTL); err != nil {
+		return nil, fmt.Errorf("OVS is not installed")
+	}
+	if _, err := execer.LookPath(OVS_VSCTL); err != nil {
+		return nil, fmt.Errorf("OVS is not installed")
+	}
+
 	// Always execute and pipe using shell when created with New.
 	c := &Client{
 		flags:      make([]string, 0),
@@ -240,7 +253,7 @@ func New(options ...OptionFunc) *Client {
 	}
 	c.App = app
 
-	return c
+	return c, nil
 }
 
 // An OptionFunc is a function which can apply configuration to a Client.
